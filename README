@@ -1,1 +1,6 @@
 HSKA FSI Payment Backend
+
+Generate server key:
+openssl req -new -x509 -keyout server.pem -out server.pem -days 1095 -nodes
+
+You also need the certificate for the client, so copy the server.pem to something like client.pem and delete the private key.
