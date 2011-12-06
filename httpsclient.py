@@ -1,9 +1,4 @@
-import httplib
-import re
-import socket
-import sys
-import urllib2
-import ssl
+import httplib, re, socket, sys, urllib, urllib2, ssl, json
 
 class InvalidCertificateException(httplib.HTTPException, urllib2.URLError):
     def __init__(self, host, cert, reason):
@@ -70,7 +65,6 @@ class VerifiedHTTPSHandler(urllib2.HTTPSHandler):
             full_kwargs = dict(self._connection_args)
             full_kwargs.update(kwargs)
             return CertValidatingHTTPSConnection(host, **full_kwargs)
-
         try:
             return self.do_open(http_class_wrapper, req)
         except urllib2.URLError, e:
@@ -87,6 +81,9 @@ if __name__ == "__main__":
         exit(2)
 
     handler = VerifiedHTTPSHandler(ca_certs = sys.argv[1])
+    json = json.dumps({"action":"getBalance", "mifareid":"3", "cardid":"6"})
+    req = {"request":json}
+    params = urllib.urlencode(req)
     opener = urllib2.build_opener(handler)
-    print opener.open(sys.argv[2]).read()
+    print opener.open(sys.argv[2], params).read()
 
