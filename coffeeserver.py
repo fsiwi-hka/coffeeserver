@@ -249,7 +249,7 @@ class SecureHTTPRequestHandler(SimpleHTTPRequestHandler):
         request = None
         if form['request']:
             request = form['request'].value
-
+        
         if self.path=='/payment/':
             self.send_response(200)
             self.send_header('Content-type','application/json')
@@ -280,12 +280,3 @@ def start():
 if __name__ == '__main__':
     start()
 
-
-foo = {'mifareid':'3', 'cardid':'6', 'action':'get_balance'}
-
-print foo
-print foo['action']
-print json.dumps(foo)
-f = json.loads(json.dumps(foo))
-print f
-print f['action']
