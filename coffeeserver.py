@@ -265,10 +265,10 @@ def start():
     server_address = ('', 1443)
     payment = Payment(debug=True)
 
-    wallet = payment.getWalletByCard(3, 6)
+    wallet = payment.getWalletByCard(337666007, 676001278543)
 
     if wallet == None:
-        wallet = payment.addWallet(3, 6)
+        wallet = payment.addWallet(337666007, 676001278543)
         payment.addBalance(wallet, 10)
 
 
