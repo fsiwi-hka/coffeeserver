@@ -254,7 +254,8 @@ class SecureHTTPRequestHandler(SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type','application/json')
             self.end_headers()
-            self.wfile.write(self.server.payment.parseCommand(request))
+            resp = self.server.payment.parseCommand(request)
+            self.wfile.write(resp)
         else:
             self.send_response(404)
             self.send_header('Content-type', 'text/html')
