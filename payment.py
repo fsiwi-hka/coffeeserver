@@ -182,7 +182,7 @@ class Payment(object):
             if not self.redeemCode(wallet, code):
                 return json.dumps(result)
 
-            return jsom.dumps({"success":"True"})
+            return json.dumps({"success":"True"})
  
         # Get balance by cardid, return 0 when card is not known
         if action == "getBalance":
