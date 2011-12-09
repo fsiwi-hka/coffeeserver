@@ -121,13 +121,23 @@ class Payment(object):
         wallet.transactions.append(Transaction(0, balance, "Added moneh"))
         self.session.commit()
         return True
-
-    def redeemCode(self, wallet, code):
-        if wallet == None or code == None:
+    
+    def redeemToken(self, wallet, tokenCode):
+        if wallet == None or tokenCode == None:
             return False
 
-        if code == 1337:
+        token = self.session.query(Token).filter_by(token=tokenCode, valid=True).first()
+        if token is not None:
+            wallet.balance += token.value
+            token.valid = True
+            wallet.transactions.append(Transaction(0, token.value, "Redeemed " + str(token.token)))
+            self.session.commit()    
+            return True
+
+        # Umh... 
+        if tokenCode == 1337:
             wallet.balance = wallet.balance + 10.0
+            wallet.transactions.append(Transaction(0, 10.0, "Used 1337 cheat code"))
             self.session.commit()
             return True
         
@@ -141,7 +151,7 @@ class Payment(object):
             return False
 
         wallet.balance = wallet.balance - math.fabs(price)
-        wallet.transactions.append(Transaction(0, price, description))
+        wallet.transactions.append(Transaction(0, price, "Bought " + str(description)))
         self.session.commit()
         return True
     
@@ -168,9 +178,9 @@ class Payment(object):
         wallet = self.getWalletByCard(mifareid, cardid)
         
         # This is the only command that does not need a valid wallet, it will create one on success 
-        if action == "redeemCode":
+        if action == "redeemToken":
             try:
-                code = int(command['code'])
+                code = int(command['token'])
             except:
                 return json.dumps(result)
 
@@ -179,7 +189,7 @@ class Payment(object):
             if not wallet:
                 return json.dumps(result)
             
-            if not self.redeemCode(wallet, code):
+            if not self.redeemToken(wallet, code):
                 return json.dumps(result)
 
             return json.dumps({"success":"True"})
