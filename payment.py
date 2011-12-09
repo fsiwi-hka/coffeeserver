@@ -151,7 +151,7 @@ class Payment(object):
             return False
 
         wallet.balance = wallet.balance - math.fabs(price)
-        wallet.transactions.append(Transaction(0, price, "Bought " + str(description)))
+        wallet.transactions.append(Transaction(0, (price*-1), "Bought " + str(description)))
         self.session.commit()
         return True
     
