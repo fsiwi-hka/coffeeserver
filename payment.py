@@ -1,4 +1,4 @@
-import json
+import json, math
 
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
