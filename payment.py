@@ -155,63 +155,52 @@ class Payment(object):
         self.session.commit()
         return True
     
-    def parseCommand(self, command):
-        result = {"success":"False"}
+    def parseRequest(self, request, response):
+        response.success = False
         
-        if command == None:
-            return json.dumps(result)
+        if request == None:
+            return response
 
-        action = None
-        mifareid = None
-        cardid = None
-        try:
-            command = json.loads(command)
-            action = command['action']
-            mifareid = int(command['mifareid'])
-            cardid = int(command['cardid'])
-        except:
-            return json.dumps(result)
+        if request.action == "" or request.mifareid == 0 or request.cardid == 0:
+            return response
 
-        if action == "" or action == None or mifareid == "" or mifareid == 0 or mifareid == None or cardid == "" or cardid == 0 or cardid == None:
-            return json.dumps(result)
-
-        wallet = self.getWalletByCard(mifareid, cardid)
+        wallet = self.getWalletByCard(request.mifareid, request.cardid)
         
         # This is the only command that does not need a valid wallet, it will create one on success 
-        if action == "redeemToken":
+        if request.action == "redeemToken":
             try:
-                code = int(command['token'])
+                code = int(request.data['token'])
             except:
-                return json.dumps(result)
+                return response
 
             if not wallet:
-                wallet = self.addWallet(mifareid, cardid)
+                wallet = self.addWallet(request.mifareid, request.cardid)
             if not wallet:
-                return json.dumps(result)
+                return response
             
             if not self.redeemToken(wallet, code):
-                return json.dumps(result)
+                return response
 
-            return json.dumps({"success":"True"})
- 
+            response.success = True
+            return response
+
         # Get balance by cardid, return 0 when card is not known
-        if action == "getBalance":
-            balance = 0
+        if request.action == "getBalance":
+            response.data['balance'] = 0
             if wallet:
-                balance = wallet.balance
-            result = {"success":"True", "balance":balance}
-            return json.dumps(result)
-
+                response.data['balance'] = wallet.balance
+            response.success = True
+            return response
   
         # After this, a valid wallet is needed
         if not wallet:
-            return json.dumps(result)
+            return response
         
-        if action == "buyItem":
+        if request.action == "buyItem":
             try:
-                item = int(command['item'])
+                item = int(request.data['item'])
             except:
-                return json.dumps(result)
+                return response
             
             price = 0
             desc = ""
@@ -225,24 +214,10 @@ class Payment(object):
                 desc = "Club-Mate"
 
             if self.buyItem(wallet, price, desc):
-                return json.dumps({"success":"True", "balance":wallet.balance})
+                response.success = True
+                response.data['balance'] = wallet.balance
+                return response
 
-            return json.dumps(result)
-
-        return json.dumps(result)
-#mifareid = 3
-#cardid = 6
-
-#p = Payment(debug=True)
-
-#wallet = p.getWalletByCard(mifareid, cardid)
-
-#if wallet == None:
-#    wallet = p.addWallet(mifareid, cardid)
-#    p.addUser("testuser", "testpassword", wallet)
-
-#p.addBalance(wallet, 1)
-#p.buyItem(wallet, 1.0, "Club-Mate")
-#p.buyItem(wallet, 1.0, "Club-Mate")
-
+            return response
+        return response
 

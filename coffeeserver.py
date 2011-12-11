@@ -1,10 +1,13 @@
-import math, hashlib, time, random, socket, os, json, cgi
+import math, hashlib, time, random, socket, os, sys, json, cgi, ast
 from SocketServer import BaseServer
 from BaseHTTPServer import HTTPServer
 from SimpleHTTPServer import SimpleHTTPRequestHandler
 from OpenSSL import SSL
 
 from payment import *
+
+sys.path.insert(0, "coffeeprotocol/")
+from coffeeprotocol import *
 
 class SecureHTTPServer(HTTPServer):
     def __init__(self, server_address, HandlerClass, payment):
@@ -17,6 +20,9 @@ class SecureHTTPServer(HTTPServer):
         ctx.use_privatekey_file(fpem)
         ctx.use_certificate_file(fpem)
         self.socket = SSL.Connection(ctx, socket.socket(self.address_family, self.socket_type))
+
+        self.protocol = CoffeeProtocol()
+
         self.server_bind()
         self.server_activate()
 
@@ -38,13 +44,16 @@ class SecureHTTPRequestHandler(SimpleHTTPRequestHandler):
         request = None
         if form['request']:
             request = form['request'].value
+            request = ast.literal_eval(request)
         
         if self.path=='/payment/':
             self.send_response(200)
             self.send_header('Content-type','application/json')
             self.end_headers()
-            resp = self.server.payment.parseCommand(request)
-            self.wfile.write(resp)
+    
+            req = self.server.protocol.parseRequest(request, "public.pem")
+            resp = self.server.payment.parseRequest(req, self.server.protocol.buildResponse())
+            self.wfile.write(resp.compile())
         else:
             self.send_response(404)
             self.send_header('Content-type', 'text/html')
@@ -53,7 +62,7 @@ class SecureHTTPRequestHandler(SimpleHTTPRequestHandler):
 
 def start():
     server_address = ('', 1443)
-    payment = Payment(debug=True)
+    payment = Payment(debug=False)
 
     wallet = payment.getWalletByCard(3, 6)
 
