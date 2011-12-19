@@ -6,7 +6,9 @@ from OpenSSL import SSL
 
 from payment import *
 
+sys.path.insert(0, "thirdparty/")
 sys.path.insert(0, "coffeeprotocol/")
+import config
 from coffeeprotocol import *
 
 class SecureHTTPServer(HTTPServer):
@@ -64,7 +66,10 @@ class SecureHTTPRequestHandler(SimpleHTTPRequestHandler):
 
 def start():
     server_address = ('', 1443)
-    payment = Payment(debug=False)
+
+    cfg = config.Config(file("coffeeserver.config"))
+
+    payment = Payment(cfg.server.constring, debug=True)
 
     wallet = payment.getWalletByCard(3, 6)
 

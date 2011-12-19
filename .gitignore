@@ -1,4 +1,5 @@
 *.swp
 *.pyc
 *.pem
+coffeeserver.config
 payment.db

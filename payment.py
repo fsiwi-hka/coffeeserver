@@ -84,8 +84,8 @@ class Token(Base):
 
 
 class Payment(object):
-    def __init__(self, dbfile = "payment.db", debug=False):
-        self.engine = create_engine("sqlite:///" + str(dbfile), echo=debug) 
+    def __init__(self, constring= "sqlite:///payment.db", debug=False):
+        self.engine = create_engine(constring, echo=debug) 
         self.metadata = Base.metadata
         self.metadata.create_all(self.engine)
         Session = sessionmaker(bind=self.engine)
