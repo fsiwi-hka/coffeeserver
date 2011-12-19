@@ -44,6 +44,7 @@ class SecureHTTPRequestHandler(SimpleHTTPRequestHandler):
         request = None
         if form['request']:
             request = form['request'].value
+            print request
             request = ast.literal_eval(request)
         
         if self.path=='/payment/':
@@ -52,6 +53,7 @@ class SecureHTTPRequestHandler(SimpleHTTPRequestHandler):
             self.end_headers()
     
             req = self.server.protocol.parseRequest(request, "public.pem")
+            print req
             resp = self.server.payment.parseRequest(req, self.server.protocol.buildResponse())
             self.wfile.write(resp.compile())
         else:

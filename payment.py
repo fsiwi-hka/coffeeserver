@@ -35,7 +35,7 @@ class Wallet(Base):
     id = Column(Integer, primary_key=True)
     mifareid = Column(Integer)
     cardid = Column(Integer)
-    balance = Column(Float)
+    balance = Column(Integer)
     userid = Column(Integer, ForeignKey('users.id'))
  
     def __init__(self, mifareid, cardid):
@@ -53,7 +53,7 @@ class Transaction(Base):
     walletid = Column(Integer, ForeignKey('wallets.id'))
     time = Column(Integer)
     wallet = relationship(Wallet, backref=backref('transactions', order_by=id))
-    change = Column(Float)
+    change = Column(Integer)
     description = Column(String)
  
     def __init__(self, time, change, description = ""):
@@ -69,7 +69,7 @@ class Token(Base):
 
     id = Column(Integer, primary_key=True)
     token = Column(Integer)
-    value = Column(Float)
+    value = Column(Integer)
     valid = Column(Boolean)
     used_by = Column(Integer, ForeignKey('wallets.id'))
     used_time = Column(Integer)
@@ -136,8 +136,8 @@ class Payment(object):
 
         # Umh... 
         if tokenCode == 1337:
-            wallet.balance = wallet.balance + 10.0
-            wallet.transactions.append(Transaction(0, 10.0, "Used 1337 cheat code"))
+            wallet.balance = wallet.balance + 10
+            wallet.transactions.append(Transaction(0, 10, "Used 1337 cheat code"))
             self.session.commit()
             return True
         
@@ -206,11 +206,11 @@ class Payment(object):
             desc = ""
             
             if item == 1:
-                price = 0.5
+                price = 5
                 desc = "Kaffee"
 
             if item == 2:
-                price = 1.5
+                price = 15
                 desc = "Club-Mate"
 
             if self.buyItem(wallet, price, desc):
