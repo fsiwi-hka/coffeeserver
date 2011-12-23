@@ -112,7 +112,10 @@ class Payment(object):
         
     def getItems(self):
         return self.session.query(Item).all()
- 
+
+    def getItemById(self, id):
+        return self.session.query(Item).filter_by(id=id).first()
+
     def getWalletByCard(self, mifareid, cardid):
         return self.session.query(Wallet).filter_by(mifareid=mifareid, cardid=cardid).first()
 

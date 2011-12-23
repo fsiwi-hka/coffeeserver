@@ -44,12 +44,17 @@ class SecureHTTPRequestHandler(SimpleHTTPRequestHandler):
         self.wfile = socket._fileobject(self.request, "wb", self.wbufsize)
 
     def do_GET(self):
+        item = None
         if self.path.startswith("/resource/"):
             id = toInt(self.path[10:])
+            item = self.server.payment.getItemById(id)
+
+        if item is not None:
             self.send_response(200)
-            self.send_header('Content-type','text/plain')
+            self.send_header('Content-type','image/png')
             self.end_headers()
-            self.wfile.write(id)
+            file = open("resource/items/" + item.image, "r")
+            self.wfile.write(file.read())
         else:
             self.send_response(404)
             self.send_header('Content-type', 'text/html')
@@ -94,8 +99,8 @@ def start():
 
     items = payment.getItems()
     if len(items) == 0:
-        payment.addItem(Item("Kaffee", 5, "Kaffee.png"))
-        payment.addItem(Item("Club-Mate", 15, "ClubMate.png"))
+        payment.addItem(Item("Kaffee", 5, "coffee.png"))
+        payment.addItem(Item("Club-Mate", 15, "mate.png"))
        
     httpd = SecureHTTPServer(server_address, SecureHTTPRequestHandler, payment)
     sa = httpd.socket.getsockname()
