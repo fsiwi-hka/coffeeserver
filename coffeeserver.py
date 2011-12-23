@@ -11,6 +11,14 @@ sys.path.insert(0, "coffeeprotocol/")
 import config
 from coffeeprotocol import *
 
+def toInt(s):
+    i = 0
+    try:
+        i = int(s)
+    except:
+        pass
+    return i
+
 class SecureHTTPServer(HTTPServer):
     def __init__(self, server_address, HandlerClass, payment):
         BaseServer.__init__(self, server_address, HandlerClass)
@@ -36,10 +44,17 @@ class SecureHTTPRequestHandler(SimpleHTTPRequestHandler):
         self.wfile = socket._fileobject(self.request, "wb", self.wbufsize)
 
     def do_GET(self):
-        self.send_response(404)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-        self.wfile.write("")
+        if self.path.startswith("/resource/"):
+            id = toInt(self.path[10:])
+            self.send_response(200)
+            self.send_header('Content-type','text/plain')
+            self.end_headers()
+            self.wfile.write(id)
+        else:
+            self.send_response(404)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write("Sorry.")
         
     def do_POST(self):
         form = cgi.FieldStorage(fp=self.rfile, headers=self.headers, environ={'REQUEST_METHOD':'POST', 'CONTENT_TYPE':self.headers['Content-Type'], })
@@ -75,9 +90,13 @@ def start():
 
     if wallet == None:
         wallet = payment.addWallet(3, 6)
-        payment.addBalance(wallet, 10)
+        payment.addBalance(wallet, 100)
 
-
+    items = payment.getItems()
+    if len(items) == 0:
+        payment.addItem(Item("Kaffee", 5, "Kaffee.png"))
+        payment.addItem(Item("Club-Mate", 15, "ClubMate.png"))
+       
     httpd = SecureHTTPServer(server_address, SecureHTTPRequestHandler, payment)
     sa = httpd.socket.getsockname()
     print "Serving HTTPS on", sa[0], "port", sa[1], "..."

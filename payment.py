@@ -82,6 +82,21 @@ class Token(Base):
     def __repr__(self):
         return "<Token('%s', '%s', '%s', '%s')>" % (self.id, self.token, self.value, self.valid)
 
+class Item(Base):
+    __tablename__ = "items"
+
+    id = Column(Integer, primary_key=True)
+    price = Column(Integer)
+    desc = Column(String)
+    image = Column(String)
+
+    def __init__(self, desc, price, image):
+        self.desc = desc
+        self.price = price
+        self.image = image
+
+    def __repr__(self):
+        return "<Item('%s', '%s', '%s')>" % (self.price, self.desc, self.image)
 
 class Payment(object):
     def __init__(self, constring= "sqlite:///payment.db", debug=False):
@@ -91,6 +106,13 @@ class Payment(object):
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
 
+    def addItem(self, item):
+        self.session.add(item)
+        self.session.commit()
+        
+    def getItems(self):
+        return self.session.query(Item).all()
+ 
     def getWalletByCard(self, mifareid, cardid):
         return self.session.query(Wallet).filter_by(mifareid=mifareid, cardid=cardid).first()
 
@@ -136,8 +158,8 @@ class Payment(object):
 
         # Umh... 
         if tokenCode == 1337:
-            wallet.balance = wallet.balance + 10
-            wallet.transactions.append(Transaction(0, 10, "Used 1337 cheat code"))
+            wallet.balance = wallet.balance + 1000
+            wallet.transactions.append(Transaction(0, 100, "Used 1337 cheat code"))
             self.session.commit()
             return True
         
