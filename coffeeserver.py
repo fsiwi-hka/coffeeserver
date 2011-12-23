@@ -45,8 +45,8 @@ class SecureHTTPRequestHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         item = None
-        if self.path.startswith("/resource/"):
-            id = toInt(self.path[10:])
+        if self.path.startswith("/resource/item/"):
+            id = toInt(self.path[15:])
             item = self.server.payment.getItemById(id)
 
         if item is not None:
