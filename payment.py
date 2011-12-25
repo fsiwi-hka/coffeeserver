@@ -117,6 +117,9 @@ class Payment(object):
         return self.session.query(Item).filter_by(id=id).first()
 
     def getWalletByCard(self, mifareid, cardid):
+        if mifareid == 0 or cardid == 0:
+            return None
+
         return self.session.query(Wallet).filter_by(mifareid=mifareid, cardid=cardid).first()
 
     def getWalletById(self, id):
@@ -186,10 +189,25 @@ class Payment(object):
         if request == None:
             return response
 
-        if request.action == "" or request.mifareid == 0 or request.cardid == 0:
+        if request.action == "":
             return response
 
         wallet = self.getWalletByCard(request.mifareid, request.cardid)
+
+        if request.action == "getItems":
+            items = self.getItems()
+            item_data = []
+
+            for item in items:
+                data = {}
+                data['desc'] = item.desc
+                data['price'] = item.price
+                data['id'] = item.id
+                item_data.append(data)
+
+            response.data['items'] = item_data
+            response.success = True
+            return response
         
         # This is the only command that does not need a valid wallet, it will create one on success 
         if request.action == "redeemToken":

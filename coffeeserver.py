@@ -89,7 +89,7 @@ def start():
 
     cfg = config.Config(file("coffeeserver.config"))
 
-    payment = Payment(cfg.server.constring, debug=True)
+    payment = Payment(cfg.server.constring, debug=False)
 
     wallet = payment.getWalletByCard(3, 6)
 
