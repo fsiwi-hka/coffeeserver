@@ -232,7 +232,7 @@ class Payment(object):
             response.data['balance'] = 0
             if wallet:
                 response.data['balance'] = wallet.balance
-            response.success = True
+                response.success = True
             return response
   
         # After this, a valid wallet is needed
