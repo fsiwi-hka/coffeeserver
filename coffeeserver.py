@@ -20,10 +20,11 @@ def toInt(s):
     return i
 
 class SecureHTTPServer(HTTPServer):
-    def __init__(self, server_address, HandlerClass, payment, server_cert, client_pub):
+    def __init__(self, server_address, HandlerClass, payment, server_cert, client_pub, debug = False):
         BaseServer.__init__(self, server_address, HandlerClass)
         ctx = SSL.Context(SSL.SSLv23_METHOD)
         self.payment = payment
+        self.debug = debug
         #server.pem's location (containing the server private key and
         #the server certificate).
         fpem = server_cert
@@ -77,9 +78,15 @@ class SecureHTTPRequestHandler(SimpleHTTPRequestHandler):
     
             #req = self.server.protocol.parseRequest(request, "public.pem")
             req = self.server.protocol.parseRequest(request, self.server.client_pub)
-            print req
+            if self.server.debug:
+                print "Request:"
+                print req
             resp = self.server.payment.parseRequest(req, self.server.protocol.buildResponse())
-            self.wfile.write(resp.compile())
+            resp_comp = resp.compile()
+            if self.server.debug:
+                print "Response:"
+                print resp_comp
+            self.wfile.write(resp_comp)
         else:
             self.send_response(404)
             self.send_header('Content-type', 'text/html')
@@ -106,7 +113,7 @@ def start():
         payment.addItem(Item("Kaffee", 5, "coffee.png"))
         payment.addItem(Item("Club-Mate", 15, "mate.png"))
        
-    httpd = SecureHTTPServer(server_address, SecureHTTPRequestHandler, payment, server_cert, client_pub)
+    httpd = SecureHTTPServer(server_address, SecureHTTPRequestHandler, payment, server_cert, client_pub, cfg.server.debug)
     sa = httpd.socket.getsockname()
     print "Serving HTTPS on", sa[0], "port", sa[1], "..."
     httpd.serve_forever()

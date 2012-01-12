@@ -241,22 +241,17 @@ class Payment(object):
         
         if request.action == "buyItem":
             try:
-                item = int(request.data['item'])
+                itemId = int(request.data['item'])
             except:
                 return response
             
-            price = 0
-            desc = ""
-            
-            if item == 1:
-                price = 5
-                desc = "Kaffee"
+            item = None
 
-            if item == 2:
-                price = 15
-                desc = "Club-Mate"
+            item = self.getItemById(itemId)
 
-            if self.buyItem(wallet, price, desc):
+            print item
+
+            if item != None and self.buyItem(wallet, item.price, item.desc):
                 response.success = True
                 response.data['balance'] = wallet.balance
                 return response
