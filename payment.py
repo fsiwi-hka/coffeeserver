@@ -1,4 +1,4 @@
-import json, math
+import json, math, time
 
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
@@ -155,9 +155,13 @@ class Payment(object):
             return False
 
         token = self.session.query(Token).filter_by(token=tokenCode, valid=True).first()
+        print "redeem"
+        print token
         if token is not None:
             wallet.balance += token.value
-            token.valid = True
+            token.valid = False
+            token.used_by = wallet.id
+            token.used_time = time.time()
             wallet.transactions.append(Transaction(0, token.value, "Redeemed " + str(token.token)))
             self.session.commit()    
             return True
