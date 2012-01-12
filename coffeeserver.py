@@ -91,7 +91,7 @@ def start():
 
     cfg = config.Config(file("coffeeserver.config"))
 
-    payment = Payment(cfg.server.constring, debug=False)
+    payment = Payment(cfg.server.constring, debug=cfg.server.debug)
     server_cert = cfg.server.server_cert
     client_pub = cfg.server.client_pub
 

@@ -1,5 +1,6 @@
 server:
 {
+    debug: True
     constring: 'sqlite:///payment.db'
     server_cert: 'certificates/server.pem'
     client_pub: 'certificates/public.pem'
