@@ -20,13 +20,14 @@ def toInt(s):
     return i
 
 class SecureHTTPServer(HTTPServer):
-    def __init__(self, server_address, HandlerClass, payment):
+    def __init__(self, server_address, HandlerClass, payment, server_cert, client_pub):
         BaseServer.__init__(self, server_address, HandlerClass)
         ctx = SSL.Context(SSL.SSLv23_METHOD)
         self.payment = payment
         #server.pem's location (containing the server private key and
         #the server certificate).
-        fpem = 'server.pem'
+        fpem = server_cert
+        self.client_pub = client_pub
         ctx.use_privatekey_file(fpem)
         ctx.use_certificate_file(fpem)
         self.socket = SSL.Connection(ctx, socket.socket(self.address_family, self.socket_type))
@@ -74,7 +75,8 @@ class SecureHTTPRequestHandler(SimpleHTTPRequestHandler):
             self.send_header('Content-type','application/json')
             self.end_headers()
     
-            req = self.server.protocol.parseRequest(request, "public.pem")
+            #req = self.server.protocol.parseRequest(request, "public.pem")
+            req = self.server.protocol.parseRequest(request, self.server.client_pub)
             print req
             resp = self.server.payment.parseRequest(req, self.server.protocol.buildResponse())
             self.wfile.write(resp.compile())
@@ -90,6 +92,8 @@ def start():
     cfg = config.Config(file("coffeeserver.config"))
 
     payment = Payment(cfg.server.constring, debug=False)
+    server_cert = cfg.server.server_cert
+    client_pub = cfg.server.client_pub
 
     wallet = payment.getWalletByCard(3, 6)
 
@@ -102,7 +106,7 @@ def start():
         payment.addItem(Item("Kaffee", 5, "coffee.png"))
         payment.addItem(Item("Club-Mate", 15, "mate.png"))
        
-    httpd = SecureHTTPServer(server_address, SecureHTTPRequestHandler, payment)
+    httpd = SecureHTTPServer(server_address, SecureHTTPRequestHandler, payment, server_cert, client_pub)
     sa = httpd.socket.getsockname()
     print "Serving HTTPS on", sa[0], "port", sa[1], "..."
     httpd.serve_forever()

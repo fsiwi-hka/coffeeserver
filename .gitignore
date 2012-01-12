@@ -1,3 +1,4 @@
+certificates/*
 *.swp
 *.pyc
 *.pem
