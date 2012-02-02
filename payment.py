@@ -13,7 +13,9 @@ class User(Base):
     username = Column(String)
     password = Column(String)
     salt = Column(String)
-    wallet = relationship("Wallet", uselist=False, backref="users")
+    admin = Column(Boolean)
+    #wallet = relationship("Wallet", uselist=False, backref="users")
+    wallet = Column(Integer, ForeignKey('wallets.id'))
 
     def __init__(self, username, password):
         self.username = username
@@ -33,15 +35,16 @@ class Wallet(Base):
     __tablename__ = "wallets"
  
     id = Column(Integer, primary_key=True)
-    mifareid = Column(Integer)
-    cardid = Column(Integer)
+    mifareid = Column(BigInteger)
+    cardid = Column(BigInteger)
     balance = Column(Integer)
-    userid = Column(Integer, ForeignKey('users.id'))
- 
+    #userid = Column(Integer, ForeignKey('users.id'))
+    user = relationship("User", uselist=False, backref="wallets")
+
     def __init__(self, mifareid, cardid):
         self.mifareid = mifareid
         self.cardid = cardid
-        self.balance = 0.0
+        self.balance = 0
  
     def __repr__(self):
         return "<Wallet('%s', '%s', '%s', '%s')>" % (self.id, self.mifareid, self.carid, self.balance)

@@ -3,6 +3,7 @@ from SocketServer import BaseServer
 from BaseHTTPServer import HTTPServer
 from SimpleHTTPServer import SimpleHTTPRequestHandler
 from OpenSSL import SSL
+import ssl
 
 # Coffeeprotcol
 from coffeeprotocol import *
@@ -28,6 +29,7 @@ class SecureHTTPServer(HTTPServer):
         self.client_pub = client_pub
         ctx.use_privatekey_file(fpem)
         ctx.use_certificate_file(fpem)
+        
         self.socket = SSL.Connection(ctx, socket.socket(self.address_family, self.socket_type))
 
         self.protocol = CoffeeProtocol()

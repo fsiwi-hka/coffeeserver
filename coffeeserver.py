@@ -24,9 +24,9 @@ def start():
 
     wallet = payment.getWalletByCard(3, 6)
 
-    if wallet == None:
-        wallet = payment.addWallet(3, 6)
-        payment.addBalance(wallet, 100)
+    #if wallet == None:
+    #    wallet = payment.addWallet(3, 6)
+    #    payment.addBalance(wallet, 100)
 
     items = payment.getItems()
     if len(items) == 0:
