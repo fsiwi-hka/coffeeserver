@@ -1,3 +1,3 @@
 [submodule "coffeeprotocol"]
 	path = coffeeprotocol
-	url = git@github.com:fsi-hska/coffeeprotocol.git
+	url = https://github.com/fsi-hska/coffeeprotocol.git
