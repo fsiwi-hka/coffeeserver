@@ -169,13 +169,6 @@ class Payment(object):
             self.session.commit()    
             return True
 
-        # Umh... 
-        if tokenCode == 1337:
-            wallet.balance = wallet.balance + 100
-            wallet.transactions.append(Transaction(0, 100, "Used 1337 cheat code"))
-            self.session.commit()
-            return True
-        
         return False
 
     def buyItem(self, wallet, price, description = ""):
