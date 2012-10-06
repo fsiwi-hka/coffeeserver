@@ -16,14 +16,14 @@ from httpsserver import *
 def start():
     server_address = ('', 1443)
 
+    print "Parsing config file ..."
     cfg = config.Config(file("coffeeserver.config"))
 
     payment = Payment(cfg.server.constring, debug=cfg.server.debug)
     server_cert = cfg.server.server_cert
     client_pub = cfg.server.client_pub
 
-    wallet = payment.getWalletByCard(3, 6)
-
+    #wallet = payment.getWalletByCard(3, 6)
     #if wallet == None:
     #    wallet = payment.addWallet(3, 6)
     #    payment.addBalance(wallet, 100)
@@ -31,7 +31,7 @@ def start():
     items = payment.getItems()
     if len(items) == 0:
         payment.addItem(Item("Kaffee", 5, "coffee.png"))
-        payment.addItem(Item("Club-Mate", 15, "mate.png"))
+        payment.addItem(Item("Club-Mate", 10, "mate.png"))
        
     httpd = SecureHTTPServer(server_address, SecureHTTPRequestHandler, payment, server_cert, client_pub, cfg.server.debug)
     sa = httpd.socket.getsockname()

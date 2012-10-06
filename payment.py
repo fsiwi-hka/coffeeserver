@@ -14,7 +14,6 @@ class User(Base):
     password = Column(String)
     salt = Column(String)
     admin = Column(Boolean)
-    #wallet = relationship("Wallet", uselist=False, backref="users")
     wallet = Column(Integer, ForeignKey('wallets.id'))
 
     def __init__(self, username, password):
@@ -38,7 +37,6 @@ class Wallet(Base):
     mifareid = Column(BigInteger)
     cardid = Column(BigInteger)
     balance = Column(Integer)
-    #userid = Column(Integer, ForeignKey('users.id'))
     user = relationship("User", uselist=False, backref="wallets")
 
     def __init__(self, mifareid, cardid):
@@ -134,6 +132,9 @@ class Payment(object):
         self.session.commit()
         return wallet
 
+    def getUserByWalletId(self, walletId):
+        return self.session.query(User).filter_by(wallet=walletId).first()
+
     def addUser(self, username, password, wallet):
         if wallet == None or username == "" or password == "":
             return False
@@ -149,7 +150,7 @@ class Payment(object):
             return False
         
         wallet.balance = wallet.balance + balance
-        wallet.transactions.append(Transaction(0, balance, "Added moneh"))
+        wallet.transactions.append(Transaction(int(time.time()), balance, "Added money"))
         self.session.commit()
         return True
     
@@ -158,14 +159,12 @@ class Payment(object):
             return False
 
         token = self.session.query(Token).filter_by(token=tokenCode, valid=True).first()
-        print "redeem"
-        print token
         if token is not None:
             wallet.balance += token.value
             token.valid = False
             token.used_by = wallet.id
             token.used_time = time.time()
-            wallet.transactions.append(Transaction(0, token.value, "Redeemed " + str(token.token)))
+            wallet.transactions.append(Transaction(int(time.time()), token.value, "Redeemed " + str(token.token)))
             self.session.commit()    
             return True
 
@@ -179,7 +178,7 @@ class Payment(object):
             return False
 
         wallet.balance = wallet.balance - math.fabs(price)
-        wallet.transactions.append(Transaction(0, (price*-1), "Bought " + str(description)))
+        wallet.transactions.append(Transaction(int(time.time()), (price*-1), "Bought " + str(description)))
         self.session.commit()
         return True
     
@@ -208,7 +207,16 @@ class Payment(object):
             response.data['items'] = item_data
             response.success = True
             return response
-        
+       
+        if request.action == "createWallet":
+            if not wallet:
+                wallet = self.addWallet(request.mifareid, request.cardid)
+            if not wallet:
+                return response
+
+            response.success = True
+            return response
+
         # This is the only command that does not need a valid wallet, it will create one on success 
         if request.action == "redeemToken":
             try:
@@ -227,11 +235,23 @@ class Payment(object):
             response.success = True
             return response
 
-        # Get balance by cardid, return 0 when card is not known
-        if request.action == "getBalance":
-            response.data['balance'] = 0
+        # Get balance by cardid
+        if request.action == "getWallet":
             if wallet:
+                response.data['id'] = wallet.id
+                response.data['mifareid'] = wallet.mifareid
+                response.data['cardid'] = wallet.cardid
                 response.data['balance'] = wallet.balance
+                response.data['user'] = None
+
+                user = self.getUserByWalletId(wallet.id)
+                if user is not None:
+                    userData = {}
+                    userData['id'] = user.id
+                    userData['username'] = user.username
+                    userData['admin'] = user.admin
+                    response.data['user'] = userData
+
                 response.success = True
             return response
   
@@ -245,11 +265,7 @@ class Payment(object):
             except:
                 return response
             
-            item = None
-
             item = self.getItemById(itemId)
-
-            print item
 
             if item != None and self.buyItem(wallet, item.price, item.desc):
                 response.success = True

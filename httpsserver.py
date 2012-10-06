@@ -67,7 +67,8 @@ class SecureHTTPRequestHandler(SimpleHTTPRequestHandler):
         request = None
         if form['request']:
             request = form['request'].value
-            print request
+            if self.server.debug:
+                print request
             request = ast.literal_eval(request)
         
         if self.path=='/payment/':
