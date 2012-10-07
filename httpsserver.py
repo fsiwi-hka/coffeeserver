@@ -76,7 +76,6 @@ class SecureHTTPRequestHandler(SimpleHTTPRequestHandler):
             self.send_header('Content-type','application/json')
             self.end_headers()
     
-            #req = self.server.protocol.parseRequest(request, "public.pem")
             req = self.server.protocol.parseRequest(request, self.server.client_pub)
             if self.server.debug:
                 print "Request:"

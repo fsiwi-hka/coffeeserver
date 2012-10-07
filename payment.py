@@ -18,14 +18,21 @@ class User(Base):
 
     def __init__(self, username, password):
         self.username = username
-        self.password = self.hash(password)
-
+        
         random.seed(time.time()*4.2)
         self.salt = str(time.time()) + ":" + str(random.randint(100000, 999999)) + ":" + str(username)
+        self.password = self.hash(password)
 
     def hash(self, password):
         saltedHash = hashlib.sha512(password + str(self.salt)).hexdigest()
         return saltedHash
+
+    def pack(self):
+        packed = {}
+        packed['id'] = self.id
+        packed['username'] = self.username
+        packed['admin'] = self.admin
+        return packed
 
     def __repr__(self):
         return "<User('%s', '%s', '%s', '%s')>" % (self.id, self.username, self.password, self.wallet)
@@ -44,6 +51,14 @@ class Wallet(Base):
         self.cardid = cardid
         self.balance = 0
  
+    def pack(self):
+        packed = {}
+        packed['id'] = self.id
+        packed['mifareid'] = self.mifareid
+        packed['cardid'] = self.cardid
+        packed['balance'] = self.balance
+        return packed
+
     def __repr__(self):
         return "<Wallet('%s', '%s', '%s', '%s')>" % (self.id, self.mifareid, self.carid, self.balance)
  
@@ -62,6 +77,15 @@ class Transaction(Base):
         self.change = change
         self.description = description
  
+    def pack(self):
+        packed = {}
+        packed['id'] = self.id
+        packed['walletid'] = self.walletid
+        packed['time'] = self.time
+        packed['change'] = self.change
+        packed['description'] = self.description
+        return packed
+    
     def __repr__(self):
         return "<Transaction('%s', '%s', '%s', '%s', '%s')>" % (self.id, self.time, self.walletid, self.wallet, self.change)
 
@@ -80,6 +104,16 @@ class Token(Base):
         self.value = value
         self.valid = True
 
+    def pack(self):
+        packed = {}
+        packed['id'] = self.id
+        packed['token'] = self.token
+        packed['value'] = self.value
+        packed['valid'] = self.valid
+        packed['used_by'] = self.used_by
+        packed['used_time'] = self.used_time
+        return packed
+    
     def __repr__(self):
         return "<Token('%s', '%s', '%s', '%s')>" % (self.id, self.token, self.value, self.valid)
 
@@ -96,6 +130,14 @@ class Item(Base):
         self.price = price
         self.image = image
 
+    def pack(self):
+        packed = {}
+        packed['id'] = self.id
+        packed['price'] = self.price
+        packed['desc'] = self.desc
+        packed['image'] = self.image
+        return packed
+ 
     def __repr__(self):
         return "<Item('%s', '%s', '%s')>" % (self.price, self.desc, self.image)
 
@@ -198,11 +240,7 @@ class Payment(object):
             item_data = []
 
             for item in items:
-                data = {}
-                data['desc'] = item.desc
-                data['price'] = item.price
-                data['id'] = item.id
-                item_data.append(data)
+                item_data.append(item.pack())
 
             response.data['items'] = item_data
             response.success = True
@@ -238,23 +276,19 @@ class Payment(object):
         # Get balance by cardid
         if request.action == "getWallet":
             if wallet:
-                response.data['id'] = wallet.id
-                response.data['mifareid'] = wallet.mifareid
-                response.data['cardid'] = wallet.cardid
-                response.data['balance'] = wallet.balance
-                response.data['user'] = None
-
-                user = self.getUserByWalletId(wallet.id)
-                if user is not None:
-                    userData = {}
-                    userData['id'] = user.id
-                    userData['username'] = user.username
-                    userData['admin'] = user.admin
-                    response.data['user'] = userData
-
+                response.data['wallet'] = wallet.pack()
                 response.success = True
             return response
-  
+ 
+        # Get user by wallet
+        if request.action == "getUser":
+            if wallet:
+                user = self.getUserByWalletId(wallet.id)
+                if user is not None:
+                    response.data['user'] = user.pack()
+                    response.success = True
+            return response
+
         # After this, a valid wallet is needed
         if not wallet:
             return response
@@ -269,7 +303,6 @@ class Payment(object):
 
             if item != None and self.buyItem(wallet, item.price, item.desc):
                 response.success = True
-                response.data['balance'] = wallet.balance
                 return response
 
             return response
