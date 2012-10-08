@@ -94,6 +94,7 @@ class Token(Base):
 
     id = Column(Integer, primary_key=True)
     token = Column(String)
+    pageHash = Column(String)
     value = Column(Integer)
     valid = Column(Boolean)
     used_by = Column(Integer, ForeignKey('wallets.id'))
@@ -108,6 +109,7 @@ class Token(Base):
         packed = {}
         packed['id'] = self.id
         packed['token'] = self.token
+        packed['pageHash'] = self.pageHash
         packed['value'] = self.value
         packed['valid'] = self.valid
         packed['used_by'] = self.used_by
