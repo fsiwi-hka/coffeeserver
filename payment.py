@@ -93,7 +93,7 @@ class Token(Base):
     __tablename__ = "tokens"
 
     id = Column(Integer, primary_key=True)
-    token = Column(Integer)
+    token = Column(String)
     value = Column(Integer)
     valid = Column(Boolean)
     used_by = Column(Integer, ForeignKey('wallets.id'))
@@ -258,7 +258,7 @@ class Payment(object):
         # This is the only command that does not need a valid wallet, it will create one on success 
         if request.action == "redeemToken":
             try:
-                code = int(request.data['token'])
+                code = request.data['token']
             except:
                 return response
 
