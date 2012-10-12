@@ -186,7 +186,7 @@ class Payment(object):
         self.session.commit()
         
     def getItems(self):
-        return self.session.query(Item).filter_by(enabled=True).all()
+        return self.session.query(Item).all()
 
     def getItemById(self, id):
         return self.session.query(Item).filter_by(id=id).first()
