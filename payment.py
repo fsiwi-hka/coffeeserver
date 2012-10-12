@@ -146,6 +146,31 @@ class Item(Base):
     def __repr__(self):
         return "<Item('%s', '%s', '%s')>" % (self.price, self.desc, self.image)
 
+class ItemTransaction(Base):
+    __tablename__ = "item_transactions"
+
+    id = Column(Integer, primary_key=True)
+    itemid = Column(Integer, ForeignKey('items.id'))
+    price = Column(Integer)
+    walletid = Column(Integer, ForeignKey('wallets.id'))
+    itemTransactions = relationship(Wallet, backref=backref('itemTransactions', order_by=id))
+    time = Column(Integer)
+
+    def __init__(self, itemid, price, time):
+        self.itemid = itemid
+        self.price = price
+        self.time = time
+
+    def pack(self):
+        packed = {}
+        packed['itemid'] = self.itemid
+        packed['price'] = self.price
+        packed['walletid'] = self.walletid
+        packed['time'] = self.time
+
+    def __repr__(self):
+        return "<ItemTransaction('%s', '%s', '%s', '%s', '%s')>" % (self.id, self.itemid, self.price, self.walletid, self.time)
+
 class Payment(object):
     def __init__(self, constring= "sqlite:///payment.db", debug=False):
         self.engine = create_engine(constring, echo=debug) 
@@ -159,7 +184,7 @@ class Payment(object):
         self.session.commit()
         
     def getItems(self):
-        return self.session.query(Item).all()
+        return self.session.query(Item).filter_by(enabled=True).all()
 
     def getItemById(self, id):
         return self.session.query(Item).filter_by(id=id).first()
@@ -217,15 +242,16 @@ class Payment(object):
 
         return False
 
-    def buyItem(self, wallet, price, description = ""):
+    def buyItem(self, wallet, item):
         if wallet == None:
             return False
 
-        if wallet.balance < math.fabs(price) or math.fabs(price) == 0:
+        if wallet.balance < math.fabs(item.price) or math.fabs(item.price) == 0:
             return False
 
-        wallet.balance = wallet.balance - math.fabs(price)
-        wallet.transactions.append(Transaction(int(time.time()), (price*-1), "Bought " + str(description)))
+        wallet.balance = wallet.balance - math.fabs(item.price)
+        wallet.transactions.append(Transaction(int(time.time()), (item.price*-1), "Bought " + str(item.desc)))
+        wallet.itemTransactions.append(ItemTransaction(item.id, math.fabs(item.price), int(time.time())))
         self.session.commit()
         return True
     
@@ -306,7 +332,7 @@ class Payment(object):
             
             item = self.getItemById(itemId)
 
-            if item != None and self.buyItem(wallet, item.price, item.desc):
+            if item != None and self.buyItem(wallet, item):
                 response.success = True
                 return response
 
