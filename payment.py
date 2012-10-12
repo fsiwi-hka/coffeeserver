@@ -126,11 +126,13 @@ class Item(Base):
     price = Column(Integer)
     desc = Column(String)
     image = Column(String)
+    enabled = Column(Boolean)
 
-    def __init__(self, desc, price, image):
+    def __init__(self, desc, price, image, enabled):
         self.desc = desc
         self.price = price
         self.image = image
+        self.enabled = enabled
 
     def pack(self):
         packed = {}
@@ -138,6 +140,7 @@ class Item(Base):
         packed['price'] = self.price
         packed['desc'] = self.desc
         packed['image'] = self.image
+        packed['enabled'] = self.enabled
         return packed
  
     def __repr__(self):
