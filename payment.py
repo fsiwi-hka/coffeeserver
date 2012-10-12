@@ -126,7 +126,8 @@ class Item(Base):
     price = Column(Integer)
     desc = Column(String)
     image = Column(String)
-    enabled = Column(Boolean)
+    enabled = Column(Boolean, default=True)
+    sold_out = Column(Boolean, default=False)
 
     def __init__(self, desc, price, image, enabled):
         self.desc = desc
@@ -141,10 +142,11 @@ class Item(Base):
         packed['desc'] = self.desc
         packed['image'] = self.image
         packed['enabled'] = self.enabled
+        packed['sold_out'] = self.sold_out
         return packed
  
     def __repr__(self):
-        return "<Item('%s', '%s', '%s')>" % (self.price, self.desc, self.image)
+        return "<Item('%s', '%s', '%s', '%s', '%s')>" % (self.price, self.desc, self.image, self.enabled, self.sold_out)
 
 class ItemTransaction(Base):
     __tablename__ = "item_transactions"
