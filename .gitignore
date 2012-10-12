@@ -4,3 +4,4 @@ certificates/*
 *.pem
 coffeeserver.config
 payment.db
+production_migrate.py
