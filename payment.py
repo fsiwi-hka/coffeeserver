@@ -126,6 +126,7 @@ class Item(Base):
     price = Column(Integer)
     desc = Column(String)
     image = Column(String)
+    weight = Column(Integer)
     enabled = Column(Boolean, default=True)
     sold_out = Column(Boolean, default=False)
 
