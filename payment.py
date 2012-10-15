@@ -243,7 +243,7 @@ class Payment(object):
             return True
 
         return False
-
+    
     def buyItem(self, wallet, item):
         if wallet == None:
             return False
@@ -339,5 +339,27 @@ class Payment(object):
                 return response
 
             return response
+
+        # Admin actions
+        user = self.getUserByWalletId(wallet.id)
+
+        if user is not None and user.admin is True:
+            if request.action == "updateItem":
+                try:
+                    itemId = int(request.data['item'])
+                    enabled = bool(request.data['enabled'])
+                    sold_out = bool(request.data['sold_out'])
+                except:
+                    return response
+                
+                item = self.getItemById(itemId)
+                item.enabled = enabled
+                item.sold_out = sold_out
+                self.session.commit()
+                response.success = True
+                return response
+            
+            if request.action == "getStatistics":
+                return response
         return response
 
