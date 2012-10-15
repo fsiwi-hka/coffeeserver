@@ -29,10 +29,10 @@ def start():
     #    payment.addBalance(wallet, 100)
 
     items = payment.getItems()
-    if len(items) == 0:
+    if len(items) == 0 and True == False:
         payment.addItem(Item("Kaffee", 5, "coffee.png", True))
         payment.addItem(Item("Club-Mate", 10, "mate.png", True))
-       
+
     httpd = SecureHTTPServer(server_address, SecureHTTPRequestHandler, payment, server_cert, client_pub, cfg.server.debug)
     sa = httpd.socket.getsockname()
     print "Serving HTTPS on", sa[0], "port", sa[1], "..."

@@ -1,4 +1,4 @@
-import json, math, time
+import json, math, time, sys, os, datetime
 
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
@@ -360,6 +360,22 @@ class Payment(object):
                 return response
             
             if request.action == "getStatistics":
+                oneday = 60 * 60* 24
+                weekday = datetime.datetime.today().isocalendar()[2]
+
+                today = datetime.datetime.today()
+                today = time.mktime(datetime.date(today.year, today.month, today.day).timetuple())
+                weekday_offset = (weekday-1) * oneday 
+                        
+                items = self.getItems()
+                data = {}
+                for item in items:
+                    item_data = {}
+                    item_data['day_count'] = self.session.query(ItemTransaction).filter_by(itemid=item.id).filter(ItemTransaction.time>=today).count()
+                    item_data['week_count'] = self.session.query(ItemTransaction).filter_by(itemid=item.id).filter(ItemTransaction.time>=(today-weekday_offset)).count()
+                    item_data['total_count'] = self.session.query(ItemTransaction).filter_by(itemid=item.id).count()
+                    data[int(item.id)] = item_data
+                response.data['statistics'] = data
+                response.success = True
                 return response
         return response
-
