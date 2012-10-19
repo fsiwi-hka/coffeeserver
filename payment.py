@@ -257,7 +257,27 @@ class Payment(object):
         wallet.itemTransactions.append(ItemTransaction(item.id, math.fabs(item.price), int(time.time())))
         self.session.commit()
         return True
-    
+
+    def getStatistics(self, time_from, time_end):
+        data = {'items': {}}
+        items = self.getItems()
+        for item in items:
+            item_data = {}
+            transactions = self.session.query(ItemTransaction).filter_by(itemid=item.id).filter(ItemTransaction.time>=time_from).filter(ItemTransaction.time<=time_end).all()
+
+            item_data['count'] = len(transactions)
+            item_data['revenue'] = 0
+            for transaction in transactions:
+                item_data['revenue'] += transaction.price
+            data['items'][item.id] = item_data
+
+        tokens = self.session.query(Token).filter(Token.used_time>=time_from).filter(Token.used_time<=time_end).all()
+        data['used_tokens'] = len(tokens)
+        data['used_tokens_value'] = 0
+        for token in tokens:
+            data['used_tokens_value'] += token.value
+        return data 
+
     def parseRequest(self, request, response):
         response.success = False
         
@@ -368,14 +388,10 @@ class Payment(object):
                 today = time.mktime(datetime.date(today.year, today.month, today.day).timetuple())
                 weekday_offset = (weekday-1) * oneday 
                         
-                items = self.getItems()
                 data = {}
-                for item in items:
-                    item_data = {}
-                    item_data['day_count'] = self.session.query(ItemTransaction).filter_by(itemid=item.id).filter(ItemTransaction.time>=today).count()
-                    item_data['week_count'] = self.session.query(ItemTransaction).filter_by(itemid=item.id).filter(ItemTransaction.time>=(today-weekday_offset)).count()
-                    item_data['total_count'] = self.session.query(ItemTransaction).filter_by(itemid=item.id).count()
-                    data[int(item.id)] = item_data
+                data['day'] = self.getStatistics(today, time.time())
+                data['week'] = self.getStatistics(today-weekday_offset, time.time())
+                data['total'] = self.getStatistics(0, time.time())
                 response.data['statistics'] = data
                 response.success = True
                 return response
