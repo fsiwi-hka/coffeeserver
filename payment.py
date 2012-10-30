@@ -144,6 +144,7 @@ class Item(Base):
         packed['image'] = self.image
         packed['enabled'] = self.enabled
         packed['sold_out'] = self.sold_out
+        packed['weight'] = self.weight
         return packed
  
     def __repr__(self):
@@ -187,7 +188,7 @@ class Payment(object):
         self.session.commit()
         
     def getItems(self):
-        return self.session.query(Item).all()
+        return self.session.query(Item).order_by(Item.weight.desc()).all()
 
     def getItemById(self, id):
         return self.session.query(Item).filter_by(id=id).first()
@@ -295,7 +296,6 @@ class Payment(object):
 
             for item in items:
                 item_data.append(item.pack())
-
             response.data['items'] = item_data
             response.success = True
             return response
