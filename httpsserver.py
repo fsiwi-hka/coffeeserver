@@ -31,12 +31,10 @@ class SecureHTTPServer(HTTPServer):
         ctx.use_certificate_file(fpem)
         
         self.socket = SSL.Connection(ctx, socket.socket(self.address_family, self.socket_type))
-
         self.protocol = CoffeeProtocol()
-
+        
         self.server_bind()
         self.server_activate()
-
 
 class SecureHTTPRequestHandler(SimpleHTTPRequestHandler):
     def setup(self):
@@ -46,21 +44,38 @@ class SecureHTTPRequestHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         item = None
+        cmd = self.path[1:].split("/")
         if self.path.startswith("/resource/item/"):
-            id = toInt(self.path[15:])
+            command = cmd[-2]
+            id = toInt(cmd[-1])
             item = self.server.payment.getItemById(id)
+    
+            if item is None:
+                return
 
-        if item is not None:
-            self.send_response(200)
-            self.send_header('Content-type','image/png')
-            self.end_headers()
-            file = open("resource/items/" + item.image, "r")
-            self.wfile.write(file.read())
-        else:
-            self.send_response(404)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-            self.wfile.write("Sorry.")
+            if command == "lastModified":
+                self.send_response(200)
+                self.send_header('Content-type','text/plain')
+                self.end_headers()
+                ctime = 0
+                try:
+                    ctime = os.path.getmtime("resource/items/" + item.image)
+                except:
+                    pass
+                self.wfile.write(ctime)
+
+            if command == "image":
+                self.send_response(200)
+                self.send_header('Content-type','image/png')
+                self.end_headers()
+                file = open("resource/items/" + item.image, "r")
+                self.wfile.write(file.read())
+            return
+
+        self.send_response(404)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write("Sorry.")
         
     def do_POST(self):
         form = cgi.FieldStorage(fp=self.rfile, headers=self.headers, environ={'REQUEST_METHOD':'POST', 'CONTENT_TYPE':self.headers['Content-Type'], })
