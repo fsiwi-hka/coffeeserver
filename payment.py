@@ -13,6 +13,7 @@ class User(Base):
     username = Column(String)
     password = Column(String)
     salt = Column(String)
+    email = Column(String)
     admin = Column(Boolean)
     wallet = Column(Integer, ForeignKey('wallets.id'))
 
@@ -31,6 +32,7 @@ class User(Base):
         packed = {}
         packed['id'] = self.id
         packed['username'] = self.username
+        packed['email'] = self.email
         packed['admin'] = self.admin
         return packed
 
