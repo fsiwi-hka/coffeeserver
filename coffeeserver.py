@@ -36,7 +36,7 @@ def start():
 
     httpd = SecureHTTPServer(server_address, SecureHTTPRequestHandler, payment, server_cert, client_pub, cfg.server.debug)
     sa = httpd.socket.getsockname()
-    print "Serving HTTPS on", sa[0], "port", sa[1], "..."
+    print "Serving HTTPS on", sa[0], "port", sa[1], "."
     httpd.serve_forever()
 
 if __name__ == '__main__':
