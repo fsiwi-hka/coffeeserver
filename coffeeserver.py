@@ -2,8 +2,8 @@ import math, hashlib, time, random, socket, os, sys, json, cgi, ast
 
 from payment import *
 
-sys.path.insert(0, "thirdparty/")
-sys.path.insert(0, "coffeeprotocol/")
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + "/thirdparty/")
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + "/coffeeprotocol/")
 import config
 
 # Coffeeprotcol
@@ -12,14 +12,15 @@ from coffeeprotocol import *
 # HTTPS Server
 from httpsserver import *
 
+cfg = config.Config(file("coffeeserver.config"))
+
+def load_payment():
+    return Payment(cfg.server.constring, debug=cfg.server.debug)
 
 def start():
     server_address = ('', 1443)
 
-    print "Parsing config file ..."
-    cfg = config.Config(file("coffeeserver.config"))
-
-    payment = Payment(cfg.server.constring, debug=cfg.server.debug)
+    payment = load_payment()
     server_cert = cfg.server.server_cert
     client_pub = cfg.server.client_pub
 
@@ -35,7 +36,7 @@ def start():
 
     httpd = SecureHTTPServer(server_address, SecureHTTPRequestHandler, payment, server_cert, client_pub, cfg.server.debug)
     sa = httpd.socket.getsockname()
-    print "Serving HTTPS on", sa[0], "port", sa[1], "..."
+    print "Serving HTTPS on", sa[0], "port", sa[1], "."
     httpd.serve_forever()
 
 if __name__ == '__main__':

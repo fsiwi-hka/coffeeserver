@@ -213,8 +213,20 @@ class Payment(object):
     def getUserByWalletId(self, walletId):
         return self.session.query(User).filter_by(wallet=walletId).first()
 
+    def getUserById(self, id):
+        return self.session.query(User).filter_by(id=id).first()
+
+    def getUserWithLogin(self, username, password):
+        user = self.session.query(User).filter_by(username=username).first()
+        if user is None:
+            return None
+
+        if user.password is user.hash(password):
+            return user
+        return None
+
     def addUser(self, username, password, wallet):
-        if wallet == None or username == "" or password == "":
+        if username == "" or password == "":
             return False
 
         user = User(username, password)
