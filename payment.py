@@ -281,6 +281,21 @@ class Payment(object):
             data['used_tokens_value'] += token.value
         return data 
 
+    def sendStatistics(self, email):
+        items = self.getItems()
+        transactions = self.session.query(ItemTransaction).all()
+        tokens = self.session.query(Token).filter(Token.used_time>0).all()
+
+        transactionFile = "Time; WalletID; ItemID; ItemDesc; Price;\n"
+
+        for t in transactions:
+            transactionFile += str(t.time)
+            transactionFile += str(t.walletid)
+            transactionFile += str(t.itemid)
+            transactionFile += str(t.time)
+            transactionFile += str(t.revenue)
+            transactionFile += "\n"
+
     def parseRequest(self, request, response):
         response.success = False
         
