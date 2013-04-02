@@ -15,6 +15,7 @@ class User(Base):
     salt = Column(String)
     email = Column(String)
     admin = Column(Boolean)
+    hochschulId = Column(String)
     wallet = Column(Integer, ForeignKey('wallets.id'))
 
     def __init__(self, username, password):
