@@ -50,7 +50,7 @@ class Wallet(Base):
     mifareid = Column(BigInteger)
     cardid = Column(BigInteger)
     balance = Column(Integer)
-    user = relationship("User", uselist=False, backref="wallets")
+    user = relationship("User", uselist=False, backref="wallet")
 
     def __init__(self, mifareid, cardid):
         self.mifareid = mifareid
@@ -66,7 +66,7 @@ class Wallet(Base):
         return packed
 
     def __repr__(self):
-        return "<Wallet('%s', '%s', '%s', '%s')>" % (self.id, self.mifareid, self.carid, self.balance)
+        return "<Wallet('%s', '%s', '%s', '%s')>" % (self.id, self.mifareid, self.cardid, self.balance)
  
 class Transaction(Base):
     __tablename__ = "transactions"
