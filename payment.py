@@ -1,4 +1,4 @@
-import json, math, time, sys, os, datetime
+import json, math, time, sys, os, datetime, random, hashlib
 
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
@@ -16,10 +16,13 @@ class User(Base):
     email = Column(String)
     admin = Column(Boolean)
     hochschulId = Column(String)
-    wallet = Column(Integer, ForeignKey('wallets.id'))
+    walletid = Column(Integer, ForeignKey('wallets.id'))
+    walletObj = None
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, email, hsid):
         self.username = username
+        self.email = email
+        self.hochschulId = hsid
         
         random.seed(time.time()*4.2)
         self.salt = str(time.time()) + ":" + str(random.randint(100000, 999999)) + ":" + str(username)
@@ -221,16 +224,17 @@ class Payment(object):
         user = self.session.query(User).filter_by(username=username).first()
         if user is None:
             return None
-
-        if user.password is user.hash(password):
+        print user.password
+        print user.hash(password)
+        if user.password == user.hash(password):
             return user
         return None
 
-    def addUser(self, username, password, wallet):
+    def addUser(self, username, password, email, hsid, wallet):
         if username == "" or password == "":
             return False
 
-        user = User(username, password)
+        user = User(username, password, email, hsid)
         user.wallet = wallet
         self.session.add(user)
         self.session.commit()
