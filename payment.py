@@ -101,6 +101,8 @@ class Token(Base):
     id = Column(Integer, primary_key=True)
     token = Column(String)
     pageHash = Column(String)
+    creation_time = Column(Integer)
+    created_by = Column(Integer)
     value = Column(Integer)
     valid = Column(Boolean)
     used_by = Column(Integer, ForeignKey('wallets.id'))
