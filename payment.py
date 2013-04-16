@@ -217,7 +217,7 @@ class Payment(object):
         return wallet
 
     def getUserByWalletId(self, walletId):
-        return self.session.query(User).filter_by(wallet=walletId).first()
+        return self.session.query(User).filter_by(walletid=walletId).first()
 
     def getUserById(self, id):
         return self.session.query(User).filter_by(id=id).first()
