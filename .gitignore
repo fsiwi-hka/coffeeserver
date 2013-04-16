@@ -5,3 +5,4 @@ certificates/*
 coffeeserver.config
 payment.db
 production_manage.py
+coffeeserver.sublime-workspace
