@@ -5,7 +5,7 @@ from SimpleHTTPServer import SimpleHTTPRequestHandler
 from OpenSSL import SSL
 import ssl
 
-# Coffeeprotcol
+# Coffeeprotocol
 from coffeeprotocol import *
 
 
@@ -35,6 +35,9 @@ class SecureHTTPServer(HTTPServer):
         
         self.server_bind()
         self.server_activate()
+
+    def shutdown_request(self, request):
+        request.shutdown()
 
 class SecureHTTPRequestHandler(SimpleHTTPRequestHandler):
     def setup(self):
