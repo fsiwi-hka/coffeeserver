@@ -24,10 +24,11 @@ def start():
     server_cert = cfg.server.server_cert
     client_pub = cfg.server.client_pub
 
-    #wallet = payment.getWalletByCard(3, 6)
-    #if wallet == None:
-    #    wallet = payment.addWallet(3, 6)
-    #    payment.addBalance(wallet, 100)
+# Debug-Daten
+#    wallet = payment.getWalletByCard(3, 6)								#debug
+#    if wallet == None:													#debug
+#        wallet = payment.addWallet(3, 6)								#debug
+#        payment.addBalance(wallet, 100)									#debug
 
     items = payment.getItems()
     if len(items) == 0 and True == False:

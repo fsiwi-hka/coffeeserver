@@ -335,7 +335,17 @@ class Payment(object):
             response.data['items'] = item_data
             response.success = True
             return response
-       
+
+        # Returns all known information of the item with the id
+        if request.action == "getItemById":
+            try:
+                itemId = int(request.data['itemid'])
+                response.data['item'] = self.getItemById(itemId)
+                response.success = True
+            except: 
+                pass
+            return response
+
         if request.action == "createWallet":
             if not wallet:
                 wallet = self.addWallet(request.mifareid, request.cardid)
